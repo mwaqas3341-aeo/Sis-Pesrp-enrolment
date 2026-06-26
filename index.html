@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes"/>
+<title>PESRP Markaz Enrollment | Mobile-Optimized</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  :root[data-theme="dark"] {
+    --bg-gradient: radial-gradient(circle at 10% 20%, rgba(10, 20, 30, 1) 0%, rgba(0, 0, 0, 0.95) 100%);
+    --surface: rgba(22, 27, 34, 0.85);
+    --surface2: rgba(30, 36, 44, 0.9);
+    --glass-border: rgba(56, 139, 253, 0.25);
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --pink: #f472b6;
+    --text: #e6edf3;
+    --text-muted: #7d8590;
+    --border-glow: 0 0 0 1px rgba(88,166,255,0.2);
+    --shadow: 0 8px 20px rgba(0,0,0,0.3);
+  }
+
+  :root[data-theme="light"] {
+    --bg-gradient: linear-gradient(145deg, #f0f4fa 0%, #ffffff 100%);
+    --surface: rgba(255, 255, 255, 0.9);
+    --surface2: rgba(245, 248, 250, 0.95);
+    --glass-border: rgba(9, 105, 218, 0.2);
+    --accent: #0969da;
+    --accent2: #1a7f37;
+    --pink: #d03592;
+    --text: #1f2328;
+    --text-muted: #656d76;
+    --shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  body {
+    background: var(--bg-gradient);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+    transition: background 0.25s ease;
+  }
+
+  main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  /* Header */
+  header {
+    position: sticky;
+    top: 12px;
+    z-index: 100;
+    margin: 0 12px 20px;
+    background: var(--surface);
+    backdrop-filter: blur(16px);
+    border-radius: 1.5rem;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+
+  .brand-text {
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: -0.3px;
+  }
+  .brand-sub {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+  }
+
+  .header-date {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(88,166,255,0.15);
+    padding: 6px 12px;
+    border-radius: 40px;
+    font-size: 0.7rem;
+  }
+
+  .theme-toggle {
+    background: var(--surface2);
+    border: 1px solid var(--glass-border);
+    padding: 6px 12px;
+    border-radius: 2rem;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    color: var(--text);
+  }
+
+  /* Filter Panel */
+  .filter-panel {
+    background: var(--surface);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 1.5rem;
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+  }
+
+  .filter-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .filter-group {
+    flex: 1;
+    min-width: 160px;
+  }
+
+  label {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--glass-border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 1rem;
+    font-family: 'Inter', monospace;
+    font-size: 0.85rem;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .btn-fetch {
+    background: linear-gradient(105deg, var(--accent2) 0%, #2c8c5a 100%);
+    border: none;
+    padding: 10px 24px;
+    border-radius: 1.5rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+    width: 100%;
+    justify-content: center;
+  }
+  .btn-fetch:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Stats Cards */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .card {
+    background: var(--surface);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 1.2rem;
+    padding: 16px;
+    display: none;
+    text-align: center;
+  }
+  .card.visible {
+    display: block;
+    animation: cardPop 0.4s ease;
+  }
+  @keyframes cardPop {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .card-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .card-value {
+    font-size: 1.8rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+  }
+
+  /* Status / empty states */
+  .status-msg {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 24px 16px;
+    font-size: 0.85rem;
+  }
+  .status-msg i { margin-right: 6px; }
+  .status-msg.error { color: var(--pink); }
+
+  .data-age {
+    text-align: center;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-top: -8px;
+    margin-bottom: 20px;
+  }
+
+  /* Accordion Schools */
+  .schools-accordion {
+    margin-bottom: 20px;
+  }
+
+  .accordion-controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    justify-content: flex-end;
+  }
+
+  .accordion-btn {
+    background: var(--surface2);
+    border: 1px solid var(--glass-border);
+    padding: 8px 16px;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.2s;
+  }
+
+  .accordion-btn:active {
+    transform: scale(0.96);
+  }
+
+  .school-card {
+    background: var(--surface);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--glass-border);
+    border-radius: 1.2rem;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: all 0.2s;
+  }
+
+  .school-header {
+    padding: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: background 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .school-header:active {
+    background: rgba(88,166,255,0.1);
+  }
+
+  .school-icon {
+    width: 44px;
+    height: 44px;
+    background: rgba(88,166,255,0.15);
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .school-info {
+    flex: 1;
+  }
+
+  .school-name {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .school-meta {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .school-stats {
+    display: flex;
+    gap: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .school-stats span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .expand-icon {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+  }
+  .school-card.expanded .expand-icon {
+    transform: rotate(180deg);
+  }
+
+  .school-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-top: 0px solid var(--glass-border);
+  }
+  .school-card.expanded .school-details {
+    max-height: 2000px;
+    border-top-width: 1px;
+  }
+
+  .class-table {
+    width: 100%;
+    padding: 12px 16px;
+  }
+  .class-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(88,166,255,0.1);
+  }
+  .class-row:last-child {
+    border-bottom: none;
+  }
+  .class-name {
+    font-weight: 500;
+    font-size: 0.85rem;
+    flex: 1;
+  }
+  .class-numbers {
+    display: flex;
+    gap: 16px;
+    font-size: 0.8rem;
+  }
+  .class-male { color: var(--accent); }
+  .class-female { color: var(--pink); }
+  .class-total { font-weight: 700; color: var(--accent2); }
+
+  .download-wrap {
+    margin-top: 24px;
+  }
+  .btn-outline {
+    background: transparent;
+    border: 1.5px solid var(--accent);
+    padding: 12px 24px;
+    border-radius: 2rem;
+    color: var(--accent);
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+  .btn-outline:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .progress-bar {
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent2), var(--accent), var(--pink));
+    width: 0%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2000;
+    transition: width 0.3s;
+  }
+
+  @media (max-width: 500px) {
+    main { padding: 12px; }
+    header { margin: 0 8px 16px; padding: 10px 16px; }
+    .school-name { font-size: 0.9rem; }
+    .school-stats { font-size: 0.7rem; }
+    .card-value { font-size: 1.5rem; }
+  }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--surface2); }
+  ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+
+  .badge {
+    background: rgba(88,166,255,0.2);
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.65rem;
+  }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progressBar"></div>
+
+<header>
+  <div class="logo-icon"><i class="fas fa-chalkboard-user" style="color:white"></i></div>
+  <div>
+    <div class="brand-text">PESRP Markaz</div>
+    <div class="brand-sub">Enrollment Dashboard</div>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon"></i><i class="fas fa-sun" style="display:none"></i></button>
+  <div class="header-date" id="headerDate">—</div>
+</header>
+
+<main>
+  <div class="filter-panel">
+    <div class="filter-row">
+      <div class="filter-group">
+        <label><i class="fas fa-map-marker-alt"></i> District</label>
+        <select id="selDistrict"><option>Loading...</option></select>
+      </div>
+      <div class="filter-group">
+        <label><i class="fas fa-city"></i> Tehsil</label>
+        <select id="selTehsil" disabled><option>Select District</option></select>
+      </div>
+      <div class="filter-group">
+        <label><i class="fas fa-flag-checkered"></i> Markaz</label>
+        <select id="selMarkaz" disabled><option>Select Tehsil</option></select>
+      </div>
+    </div>
+    <button class="btn-fetch" id="btnFetch" disabled onclick="handleFetch()"><i class="fas fa-database"></i> Show Enrollment Data</button>
+  </div>
+
+  <div class="cards-grid">
+    <div class="card" id="cardTotal"><div class="card-label"><i class="fas fa-users"></i> Total</div><div class="card-value" id="valTotal">0</div></div>
+    <div class="card" id="cardMale"><div class="card-label"><i class="fas fa-mars"></i> Male</div><div class="card-value" id="valMale">0</div></div>
+    <div class="card" id="cardFemale"><div class="card-label"><i class="fas fa-venus"></i> Female</div><div class="card-value" id="valFemale">0</div></div>
+  </div>
+
+  <div class="data-age" id="dataAge"></div>
+
+  <div class="schools-accordion" id="accordionContainer">
+    <div class="status-msg" id="initialStatus"><i class="fas fa-spinner fa-pulse"></i> Loading school directory…</div>
+  </div>
+
+  <div class="download-wrap">
+    <button class="btn-outline" id="btnExport" disabled onclick="exportCSV()"><i class="fas fa-download"></i> Export CSV Report</button>
+  </div>
+</main>
+
+<script type="module">
+// ============================================================
+// Data layer: reads the JSON produced by the GitHub Actions
+// bulk fetcher (scripts/run-bulk-fetch.js -> data/*.json),
+// instead of the old Google Sheet CSV + Apps Script Web App.
+// ============================================================
+
+// IMPORTANT: set this to your repo. If this page is served
+// from GitHub Pages in the SAME repo as /data, you can use a
+// relative path ("./data") instead and skip raw.githubusercontent
+// entirely -- that's simpler and avoids any CDN cache lag from
+// raw.githubusercontent.com. Relative is used below by default.
+const DATA_BASE = "./data";
+// If you prefer pulling straight from raw.githubusercontent.com
+// (e.g. this HTML lives somewhere else), use this instead:
+// const DATA_BASE = "https://raw.githubusercontent.com/<your-user>/<your-repo>/main/data";
+
+const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
+
+async function fetchJsonCached(path) {
+  const cacheKey = "pesrp_cache_" + path;
+  const cached = sessionStorage.getItem(cacheKey);
+  if (cached) {
+    try {
+      const { ts, data } = JSON.parse(cached);
+      if (Date.now() - ts < CACHE_TTL_MS) return data;
+    } catch (_) { /* fall through to refetch */ }
+  }
+  const res = await fetch(`${DATA_BASE}/${path}?v=${Date.now()}`);
+  if (!res.ok) throw new Error(`Failed to load ${path}: HTTP ${res.status}`);
+  const data = await res.json();
+  try {
+    sessionStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data }));
+  } catch (_) { /* sessionStorage full/unavailable, non-fatal */ }
+  return data;
+}
+
+const getSummary = () => fetchJsonCached("summary.json");
+const getSchools = () => fetchJsonCached("schools.json");
+const getEnrollmentByDistrict = (districtId) => fetchJsonCached(`enrollment-by-district/${districtId}.json`);
+
+// ============================================================
+// App state
+// ============================================================
+let schools = [];          // raw rows from schools.json
+let districtMap = {};      // id -> name
+let tehsilsByDistrict = {}; // districtId -> [{id, name}]
+let markazesByTehsil = {};  // tehsilId -> [{id, name}]
+let schoolsByMarkaz = {};   // markazId -> [school rows]
+
+let filteredResults = [];  // [{name, emis, level, male, female, total, details:[{className,m,f,t}]}]
+let currentMarkazName = "";
+
+window.toggleTheme = function () {
+  const root = document.documentElement;
+  const current = root.getAttribute('data-theme');
+  const newTheme = current === 'dark' ? 'light' : 'dark';
+  root.setAttribute('data-theme', newTheme);
+  applyThemeIcons(newTheme);
+};
+
+function applyThemeIcons(theme) {
+  const moonIcon = document.querySelector('.theme-toggle i.fa-moon');
+  const sunIcon = document.querySelector('.theme-toggle i.fa-sun');
+  if (theme === 'dark') { moonIcon.style.display = 'inline-flex'; sunIcon.style.display = 'none'; }
+  else { moonIcon.style.display = 'none'; sunIcon.style.display = 'inline-flex'; }
+}
+
+function showStatus(msg, isError = false) {
+  const container = document.getElementById('accordionContainer');
+  container.innerHTML = `<div class="status-msg${isError ? ' error' : ''}"><i class="fas ${isError ? 'fa-triangle-exclamation' : 'fa-circle-info'}"></i> ${msg}</div>`;
+}
+
+function populateDropdown(id, items, placeholder) {
+  const el = document.getElementById(id);
+  const sorted = [...items].sort((a, b) => a.name.localeCompare(b.name));
+  el.innerHTML = `<option value="">${placeholder}</option>` + sorted.map(o => `<option value="${o.id}">${escapeHtml(o.name)}</option>`).join('');
+  el.disabled = false;
+}
+
+async function init() {
+  applyThemeIcons(document.documentElement.getAttribute('data-theme'));
+  document.getElementById('headerDate').textContent = new Date().toLocaleDateString('en-GB');
+
+  try {
+    const [summary, schoolRows] = await Promise.all([
+      getSummary().catch(() => null),
+      getSchools(),
+    ]);
+
+    schools = schoolRows || [];
+
+    if (!schools.length) {
+      showStatus('No data yet. The GitHub Actions bulk-fetch workflow hasn\'t completed a run. Check the Actions tab.', true);
+      return;
+    }
+
+    // Build District -> Tehsil -> Markaz hierarchy straight from schools.json
+    // (every school row carries its own district/tehsil/markaz id + name).
+    schools.forEach((s) => {
+      districtMap[s.district_id] = s.district_name;
+
+      if (!tehsilsByDistrict[s.district_id]) tehsilsByDistrict[s.district_id] = {};
+      tehsilsByDistrict[s.district_id][s.tehsil_id] = s.tehsil_name;
+
+      if (!markazesByTehsil[s.tehsil_id]) markazesByTehsil[s.tehsil_id] = {};
+      markazesByTehsil[s.tehsil_id][s.markaz_id] = s.markaz_name;
+
+      if (!schoolsByMarkaz[s.markaz_id]) schoolsByMarkaz[s.markaz_id] = [];
+      schoolsByMarkaz[s.markaz_id].push(s);
+    });
+
+    const districtOptions = Object.entries(districtMap).map(([id, name]) => ({ id, name }));
+    populateDropdown('selDistrict', districtOptions, 'Select District');
+
+    if (summary && summary.generatedAt) {
+      const age = new Date(summary.generatedAt);
+      document.getElementById('dataAge').textContent =
+        `Data last updated: ${age.toLocaleString()} · ${summary.totalSchools.toLocaleString()} schools`;
+    }
+
+    showStatus('Choose a District, Tehsil, and Markaz above, then tap "Show Enrollment Data".');
+  } catch (e) {
+    showStatus(`Error loading school directory: ${e.message}`, true);
+  }
+}
+
+document.getElementById('selDistrict').addEventListener('change', (e) => {
+  const districtId = e.target.value;
+  document.getElementById('selMarkaz').disabled = true;
+  document.getElementById('selMarkaz').innerHTML = '<option>Select Tehsil First</option>';
+  document.getElementById('btnFetch').disabled = true;
+
+  if (!districtId) {
+    document.getElementById('selTehsil').disabled = true;
+    document.getElementById('selTehsil').innerHTML = '<option>Select District</option>';
+    return;
+  }
+  const tehsilOptions = Object.entries(tehsilsByDistrict[districtId] || {}).map(([id, name]) => ({ id, name }));
+  populateDropdown('selTehsil', tehsilOptions, 'Select Tehsil');
+});
+
+document.getElementById('selTehsil').addEventListener('change', (e) => {
+  const tehsilId = e.target.value;
+  document.getElementById('btnFetch').disabled = true;
+
+  if (!tehsilId) {
+    document.getElementById('selMarkaz').disabled = true;
+    document.getElementById('selMarkaz').innerHTML = '<option>Select Tehsil</option>';
+    return;
+  }
+  const markazOptions = Object.entries(markazesByTehsil[tehsilId] || {}).map(([id, name]) => ({ id, name }));
+  populateDropdown('selMarkaz', markazOptions, 'Select Markaz');
+});
+
+document.getElementById('selMarkaz').addEventListener('change', (e) => {
+  document.getElementById('btnFetch').disabled = !e.target.value;
+});
+
+window.handleFetch = async function () {
+  const districtId = document.getElementById('selDistrict').value;
+  const markazId = document.getElementById('selMarkaz').value;
+  const markazSelect = document.getElementById('selMarkaz');
+  currentMarkazName = markazSelect.options[markazSelect.selectedIndex]?.text || '';
+
+  const btn = document.getElementById('btnFetch');
+  const pb = document.getElementById('progressBar');
+  btn.disabled = true;
+  btn.innerHTML = `<i class="fas fa-spinner fa-pulse"></i> Loading...`;
+  pb.style.width = "85%";
+
+  try {
+    // Schools for this markaz already known from schools.json (fast path)
+    const markazSchools = schoolsByMarkaz[markazId] || [];
+
+    // Pull per-class breakdown for the parent district, then filter to this markaz.
+    // (enrollment-by-district/{id}.json is generated by the bulk fetcher and is
+    // much lighter than loading the full enrollment.json for all 39k schools.)
+    const districtEnrollment = await getEnrollmentByDistrict(districtId);
+    const rowsForMarkaz = districtEnrollment.filter((r) => r.markaz_id === markazId);
+
+    const bySchool = {};
+    rowsForMarkaz.forEach((r) => {
+      if (!bySchool[r.school_id]) bySchool[r.school_id] = [];
+      bySchool[r.school_id].push({ className: r.class_name, m: r.male, f: r.female, t: r.total });
+    });
+
+    filteredResults = markazSchools.map((s) => ({
+      name: s.school_name,
+      emis: s.emis_code,
+      level: s.level,
+      male: s.total_male,
+      female: s.total_female,
+      total: s.total_enrollment,
+      details: bySchool[s.school_id] || [],
+    }));
+
+    if (!filteredResults.length) {
+      showStatus(`No school data found for ${escapeHtml(currentMarkazName)} yet.`, true);
+      document.getElementById('btnExport').disabled = true;
+      document.querySelectorAll('.card').forEach(c => c.classList.remove('visible'));
+    } else {
+      renderAccordion();
+      document.getElementById('btnExport').disabled = false;
+    }
+    pb.style.width = "100%";
+    setTimeout(() => pb.style.width = "0%", 500);
+  } catch (e) {
+    showStatus(`Couldn't load enrollment data: ${e.message}`, true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="fas fa-database"></i> Show Enrollment Data`;
+  }
+};
+
+function renderAccordion() {
+  const container = document.getElementById('accordionContainer');
+  let total = 0, male = 0, female = 0;
+
+  filteredResults.forEach(r => {
+    total += r.total || 0; male += r.male || 0; female += r.female || 0;
+  });
+
+  document.getElementById('valTotal').textContent = total.toLocaleString();
+  document.getElementById('valMale').textContent = male.toLocaleString();
+  document.getElementById('valFemale').textContent = female.toLocaleString();
+  document.querySelectorAll('.card').forEach(c => c.classList.add('visible'));
+
+  let html = `
+    <div class="accordion-controls">
+      <button class="accordion-btn" onclick="expandAll()"><i class="fas fa-expand-alt"></i> Expand All</button>
+      <button class="accordion-btn" onclick="collapseAll()"><i class="fas fa-compress-alt"></i> Collapse All</button>
+    </div>
+  `;
+
+  filteredResults.forEach((school, idx) => {
+    let classesHtml = '';
+    (school.details || []).forEach(c => {
+      classesHtml += `
+        <div class="class-row">
+          <span class="class-name"><i class="fas fa-book"></i> ${escapeHtml(c.className)}</span>
+          <div class="class-numbers">
+            <span class="class-male"><i class="fas fa-mars"></i> ${Number(c.m || 0).toLocaleString()}</span>
+            <span class="class-female"><i class="fas fa-venus"></i> ${Number(c.f || 0).toLocaleString()}</span>
+            <span class="class-total"><i class="fas fa-users"></i> ${Number(c.t || 0).toLocaleString()}</span>
+          </div>
+        </div>
+      `;
+    });
+
+    html += `
+      <div class="school-card" id="school-${idx}">
+        <div class="school-header" onclick="toggleSchool(${idx})">
+          <div class="school-icon"><i class="fas fa-school"></i></div>
+          <div class="school-info">
+            <div class="school-name">
+              ${escapeHtml(school.name)}
+              <span class="badge">${escapeHtml(school.level || '')}</span>
+            </div>
+            <div class="school-meta">
+              <span><i class="fas fa-id-card"></i> EMIS: ${escapeHtml(String(school.emis ?? ''))}</span>
+              <span class="school-stats">
+                <span><i class="fas fa-mars" style="color:var(--accent)"></i> ${Number(school.male || 0).toLocaleString()}</span>
+                <span><i class="fas fa-venus" style="color:var(--pink)"></i> ${Number(school.female || 0).toLocaleString()}</span>
+                <span><i class="fas fa-users" style="color:var(--accent2)"></i> ${Number(school.total || 0).toLocaleString()}</span>
+              </span>
+            </div>
+          </div>
+          <div class="expand-icon"><i class="fas fa-chevron-down"></i></div>
+        </div>
+        <div class="school-details">
+          <div class="class-table">
+            ${classesHtml || '<div style="padding: 16px; text-align: center; color: var(--text-muted);"><i class="fas fa-info-circle"></i> No class data available</div>'}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+window.toggleSchool = function (idx) {
+  document.getElementById(`school-${idx}`).classList.toggle('expanded');
+};
+
+window.expandAll = function () {
+  filteredResults.forEach((_, idx) => {
+    const card = document.getElementById(`school-${idx}`);
+    if (card) card.classList.add('expanded');
+  });
+};
+
+window.collapseAll = function () {
+  filteredResults.forEach((_, idx) => {
+    const card = document.getElementById(`school-${idx}`);
+    if (card) card.classList.remove('expanded');
+  });
+};
+
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>]/g, (m) => {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
+  });
+}
+
+window.exportCSV = function () {
+  if (!filteredResults.length) { showStatus('No data to export. Load a Markaz first.', true); return; }
+  const timestamp = new Date().toISOString().slice(0, 10);
+  let csv = "School Name,EMIS Code,Level,Class,Male,Female,Total\n";
+  filteredResults.forEach(school => {
+    (school.details || []).forEach(cls => {
+      csv += `"${String(school.name).replace(/"/g, '""')}",${school.emis},${school.level},"${String(cls.className).replace(/"/g, '""')}",${cls.m},${cls.f},${cls.t}\n`;
+    });
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Enrollment_${currentMarkazName.replace(/[^a-z0-9]/gi, '_')}_${timestamp}.csv`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+};
+
+init();
+</script>
+</body>
+</html>
