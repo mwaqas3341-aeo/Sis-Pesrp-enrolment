@@ -9,7 +9,7 @@
 // GitHub Pages, you can instead point at your Pages URL, e.g.
 // "https://<user>.github.io/<repo>/data/summary.json"
 const DATA_BASE =
-  "https://raw.githubusercontent.com/<your-user>/<your-repo>/main/data";
+  "https://raw.githubusercontent.com/mwaqas3341-aeo/Sis-Pesrp-enrolment/main/data";
 
 // Simple cache-busting + localStorage TTL cache so you're not
 // re-downloading the full dataset on every page load.
