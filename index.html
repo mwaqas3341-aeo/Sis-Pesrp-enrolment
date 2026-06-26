@@ -6,6 +6,7 @@
 <title>PESRP Markaz Enrollment | Mobile-Optimized</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   * {
     margin: 0;
@@ -397,6 +398,8 @@
 
   .download-wrap {
     margin-top: 24px;
+    display: flex;
+    gap: 12px;
   }
   .btn-outline {
     background: transparent;
@@ -410,7 +413,11 @@
     gap: 10px;
     align-items: center;
     justify-content: center;
-    width: 100%;
+    flex: 1;
+  }
+  .btn-outline.excel {
+    border-color: var(--accent2);
+    color: var(--accent2);
   }
   .btn-outline:disabled {
     opacity: 0.5;
@@ -493,7 +500,8 @@
   </div>
 
   <div class="download-wrap">
-    <button class="btn-outline" id="btnExport" disabled onclick="exportCSV()"><i class="fas fa-download"></i> Export CSV Report</button>
+    <button class="btn-outline" id="btnExportCsv" disabled onclick="exportCSV()"><i class="fas fa-file-csv"></i> CSV</button>
+    <button class="btn-outline excel" id="btnExportXlsx" disabled onclick="exportExcel()"><i class="fas fa-file-excel"></i> Excel</button>
   </div>
 </main>
 
@@ -696,11 +704,13 @@ window.handleFetch = async function () {
 
     if (!filteredResults.length) {
       showStatus(`No school data found for ${escapeHtml(currentMarkazName)} yet.`, true);
-      document.getElementById('btnExport').disabled = true;
+      document.getElementById('btnExportCsv').disabled = true;
+      document.getElementById('btnExportXlsx').disabled = true;
       document.querySelectorAll('.card').forEach(c => c.classList.remove('visible'));
     } else {
       renderAccordion();
-      document.getElementById('btnExport').disabled = false;
+      document.getElementById('btnExportCsv').disabled = false;
+      document.getElementById('btnExportXlsx').disabled = false;
     }
     pb.style.width = "100%";
     setTimeout(() => pb.style.width = "0%", 500);
@@ -806,15 +816,56 @@ function escapeHtml(str) {
   });
 }
 
-window.exportCSV = function () {
-  if (!filteredResults.length) { showStatus('No data to export. Load a Markaz first.', true); return; }
-  const timestamp = new Date().toISOString().slice(0, 10);
-  let csv = "School Name,EMIS Code,Level,Class,Male,Female,Total\n";
-  filteredResults.forEach(school => {
-    (school.details || []).forEach(cls => {
-      csv += `"${String(school.name).replace(/"/g, '""')}",${school.emis},${school.level},"${String(cls.className).replace(/"/g, '""')}",${cls.m},${cls.f},${cls.t}\n`;
+// Builds the wide/pivoted export table:
+// EMIS Code | School Name | <one column per class found in this markaz> | Grand Total
+// Returns { headers: string[], rows: any[][] }
+function buildExportTable() {
+  // Collect every distinct class name across all schools in this markaz,
+  // in first-seen order, so column order is stable and matches the data.
+  const classOrder = [];
+  const seen = new Set();
+  filteredResults.forEach((school) => {
+    (school.details || []).forEach((c) => {
+      if (!seen.has(c.className)) {
+        seen.add(c.className);
+        classOrder.push(c.className);
+      }
     });
   });
+
+  const headers = ['EMIS Code', 'School Name', ...classOrder, 'Grand Total'];
+
+  const rows = filteredResults.map((school) => {
+    const byClass = {};
+    (school.details || []).forEach((c) => { byClass[c.className] = Number(c.t || 0); });
+    const rowTotal = classOrder.reduce((sum, cls) => sum + (byClass[cls] || 0), 0);
+    // Fall back to the school's own total if class-level detail isn't loaded,
+    // so Grand Total is never blank even when `details` is empty.
+    const grandTotal = classOrder.length ? rowTotal : Number(school.total || 0);
+    return [
+      school.emis ?? '',
+      school.name ?? '',
+      ...classOrder.map((cls) => byClass[cls] ?? 0),
+      grandTotal,
+    ];
+  });
+
+  return { headers, rows };
+}
+
+window.exportCSV = function () {
+  if (!filteredResults.length) { showStatus('No data to export. Load a Markaz first.', true); return; }
+  const { headers, rows } = buildExportTable();
+  const timestamp = new Date().toISOString().slice(0, 10);
+
+  const escapeCsv = (v) => {
+    const s = String(v ?? '');
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+
+  let csv = headers.map(escapeCsv).join(',') + '\n';
+  rows.forEach((row) => { csv += row.map(escapeCsv).join(',') + '\n'; });
+
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -822,6 +873,20 @@ window.exportCSV = function () {
   a.download = `Enrollment_${currentMarkazName.replace(/[^a-z0-9]/gi, '_')}_${timestamp}.csv`;
   a.click();
   window.URL.revokeObjectURL(url);
+};
+
+window.exportExcel = function () {
+  if (!filteredResults.length) { showStatus('No data to export. Load a Markaz first.', true); return; }
+  const { headers, rows } = buildExportTable();
+  const timestamp = new Date().toISOString().slice(0, 10);
+
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  // Reasonable column widths: EMIS, School Name wider, classes + total narrower
+  ws['!cols'] = headers.map((h, i) => ({ wch: i === 1 ? 32 : i === 0 ? 12 : 10 }));
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, currentMarkazName.slice(0, 31) || 'Enrollment');
+  XLSX.writeFile(wb, `Enrollment_${currentMarkazName.replace(/[^a-z0-9]/gi, '_')}_${timestamp}.xlsx`);
 };
 
 init();
