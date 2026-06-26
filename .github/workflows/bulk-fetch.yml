@@ -1,16 +1,9 @@
 name: PESRP Bulk Fetch
 
 on:
-  # Runs nightly so data/*.json is fresh and committed before 6:00 AM PKT
-  # (PKT = UTC+5, so 6:00 AM PKT = 01:00 UTC).
-  # First run starts at 20:00 UTC (01:00 AM PKT) with up to 5 hrs budget,
-  # finishing well before 6 AM. A second run at 00:00 UTC (05:00 AM PKT)
-  # acts as a resume/safety-net pass in case 39k schools haven't finished
-  # in one pass yet (checkpoint.json picks up exactly where it left off).
+  # Runs precisely at 1:00 AM PKT (20:00 UTC) every night.
   schedule:
     - cron: "0 20 * * *"
-    - cron: "0 0 * * *"
-  # Allow manual trigger from the Actions tab, with optional reset
   workflow_dispatch:
     inputs:
       reset:
@@ -18,7 +11,6 @@ on:
         required: false
         default: "false"
 
-# Prevent overlapping runs from racing on the same checkpoint file
 concurrency:
   group: pesrp-bulk-fetch
   cancel-in-progress: false
@@ -26,7 +18,7 @@ concurrency:
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 350 # stay under the 360 min hard limit, leave buffer for commit/push
+    timeout-minutes: 60 # Hard limit set to 1 hour
 
     steps:
       - name: Checkout repo
@@ -39,14 +31,17 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Run bulk fetch (resume from checkpoint)
+      - name: Run bulk fetch (High Concurrency)
         env:
           ACADEMIC_YEAR: "2025-26"
+        # max-ms=3300000 limits the script to 55 minutes, leaving 5 mins for the Git commit
+        # concurrency=30 attempts to process 30 schools in parallel to beat the 1-hour clock
+        # delay-ms=0 removes the artificial pause between markazes
         run: |
           if [ "${{ github.event.inputs.reset }}" = "true" ]; then
-            node scripts/run-bulk-fetch.js --reset --max-ms=18000000
+            node scripts/run-bulk-fetch.js --reset --max-ms=3300000 --concurrency=30 --delay-ms=0
           else
-            node scripts/run-bulk-fetch.js --max-ms=18000000
+            node scripts/run-bulk-fetch.js --max-ms=3300000 --concurrency=30 --delay-ms=0
           fi
 
       - name: Commit and push updated data
@@ -57,7 +52,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "chore: update PESRP enrollment data [skip ci]"
+            git commit -m "chore: nightly PESRP enrollment sync [skip ci]"
             git push
           fi
 
@@ -67,4 +62,4 @@ jobs:
         with:
           name: run-log
           path: data/run-log.txt
-          retention-days: 14
+          retention-days: 7
