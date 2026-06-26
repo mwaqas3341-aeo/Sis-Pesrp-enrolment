@@ -1,0 +1,13 @@
+{
+  "name": "pesrp-fetcher",
+  "version": "1.0.0",
+  "description": "Bulk fetcher for PESRP SIS enrollment data, runs via GitHub Actions",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "fetch": "node scripts/run-bulk-fetch.js",
+    "fetch:reset": "node scripts/run-bulk-fetch.js --reset"
+  }
+}
