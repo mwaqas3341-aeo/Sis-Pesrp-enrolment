@@ -1,65 +1,51 @@
-name: PESRP Bulk Fetch
+name: PESRP Nightly Sync
 
 on:
-  # Runs precisely at 1:00 AM PKT (20:00 UTC) every night.
   schedule:
-    - cron: "0 20 * * *"
+    - cron: "0 20 * * *" # 1:00 AM PKT
   workflow_dispatch:
     inputs:
       reset:
-        description: "Reset checkpoint and start fresh (true/false)"
-        required: false
-        default: "false"
+        description: "Start fresh (delete checkpoint)"
+        type: boolean
+        default: false
 
-concurrency:
-  group: pesrp-bulk-fetch
-  cancel-in-progress: false
+permissions:
+  contents: write
 
 jobs:
-  fetch:
+  sync-data:
     runs-on: ubuntu-latest
-    timeout-minutes: 60 # Hard limit set to 1 hour
+    timeout-minutes: 60
 
     steps:
-      - name: Checkout repo
+      - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      - name: Run bulk fetch (High Concurrency)
-        env:
-          ACADEMIC_YEAR: "2025-26"
-        # max-ms=3300000 limits the script to 55 minutes, leaving 5 mins for the Git commit
-        # concurrency=30 attempts to process 30 schools in parallel to beat the 1-hour clock
-        # delay-ms=0 removes the artificial pause between markazes
-        run: |
-          if [ "${{ github.event.inputs.reset }}" = "true" ]; then
-            node scripts/run-bulk-fetch.js --reset --max-ms=3300000 --concurrency=30 --delay-ms=0
-          else
-            node scripts/run-bulk-fetch.js --max-ms=3300000 --concurrency=30 --delay-ms=0
-          fi
+      - name: Handle Reset
+        if: ${{ github.event.inputs.reset == 'true' }}
+        run: rm -f data/checkpoint.json data/class_wise_enrollment.json
 
-      - name: Commit and push updated data
+      - name: Run Fetch Script
+        run: node scripts/run-bulk-fetch.js
+        env:
+          # You can store these securely in GitHub Repository Secrets
+          PESRP_COOKIE: ${{ secrets.PESRP_COOKIE }}
+          PESRP_CSRF: ${{ secrets.PESRP_CSRF }}
+
+      - name: Commit and Push Data
         run: |
-          git config user.name "pesrp-bot"
+          git config user.name "Mastermind OS Bot"
           git config user.email "actions@github.com"
           git add data/
           if git diff --cached --quiet; then
-            echo "No changes to commit."
+            echo "No data changes to commit."
           else
-            git commit -m "chore: nightly PESRP enrollment sync [skip ci]"
+            git commit -m "chore: nightly enrollment update"
             git push
           fi
-
-      - name: Upload run log as artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: run-log
-          path: data/run-log.txt
-          retention-days: 7
