@@ -1,0 +1,61 @@
+name: PESRP Bulk Fetch
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+    inputs:
+      reset:
+        description: "Reset checkpoint and start fresh (true/false)"
+        required: false
+        default: "false"
+
+concurrency:
+  group: pesrp-bulk-fetch
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run bulk fetch (resume from checkpoint)
+        env:
+          ACADEMIC_YEAR: "2025-26"
+        run: |
+          if [ "${{ github.event.inputs.reset }}" = "true" ]; then
+            node scripts/run-bulk-fetch.js --reset --max-ms=18000000
+          else
+            node scripts/run-bulk-fetch.js --max-ms=18000000
+          fi
+
+      - name: Commit and push updated data
+        run: |
+          git config user.name "pesrp-bot"
+          git config user.email "actions@github.com"
+          git add data/
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: update PESRP enrollment data [skip ci]"
+            git push
+          fi
+
+      - name: Upload run log as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run-log
+          path: data/run-log.txt
+          retention-days: 14
