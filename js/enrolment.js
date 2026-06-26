@@ -53,6 +53,9 @@ export async function getSchools() {
 // Full enrollment detail (one row per school+class) — can be large
 // for 39,000 schools, so prefer getEnrollmentByDistrict() when you
 // only need one district's data.
+// Full enrollment detail (one row per school+class) — can be large
+// for 39,000 schools, so prefer getEnrollmentByDistrict() when you
+// only need one district's data.
 export async function getAllEnrollment() {
   return fetchJsonCached("enrollment.json");
 }
@@ -63,7 +66,9 @@ export async function getEnrollmentByDistrict(districtId) {
   return fetchJsonCached(`enrollment-by-district/${districtId}.json`);
 }
 
-// Districts/Tehsils/Markazes reference lists
-export async function getDistricts() {
-  return fetchJsonCached("districts.json");
+// --- ADD THE NEW FUNCTION RIGHT HERE AT THE BOTTOM ---
+
+// Fetches the newly formatted Markaz-batched class-wise enrollment data
+export async function getClassWiseEnrollment() {
+  return fetchJsonCached("class_wise_enrollment.json");
 }
